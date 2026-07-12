@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1950c9aacec9a7d478f391759648bf2f, type: 3}
+  m_Name: Charge
+  m_EditorClassIdentifier: Assembly-CSharp::ChargeAbility
+  abilityName: Charge
+  description: "Rusa fram till m\xE5let och sl\xE5 till. Gap-closer."
+  icon: {fileID: 0}
+  isFreeFiller: 0
+  cooldown: 6
+  rageCost: 20
+  requiresTarget: 1
+  range: 20
+  chargeDamage: 20
+  chargeSpeed: 22
+  stopDistance: 2.5
+  maxChargeTime: 1

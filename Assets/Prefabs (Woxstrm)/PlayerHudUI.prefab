@@ -1,0 +1,70 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &4693504369013908318
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 787079539330923047}
+  - component: {fileID: 7768727981713413447}
+  m_Layer: 0
+  m_Name: PlayerHudUI
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &787079539330923047
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4693504369013908318}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0.9562, y: 0.1446, z: 12.25006}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &7768727981713413447
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4693504369013908318}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 332773cc1f0bd1c4a87ab0b1963ce919, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerHudUI
+  health: {fileID: 0}
+  rage: {fileID: 0}
+  playerName: Woxstrm
+  playerLevel: 80
+  hudPosition: {x: 24, y: 24}
+  portraitSize: 96
+  portraitPlaceholderColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
+  barWidth: 250
+  healthBarHeight: 35
+  rageBarWidth: 220
+  rageBarHeight: 31
+  barSpacing: 4
+  healthColor: {r: 1, g: 0, b: 0, a: 1}
+  rageColor: {r: 1, g: 0.55, b: 0, a: 1}
+  barBackground: {r: 0.08, g: 0.08, b: 0.08, a: 0.9}
+  nameFont: {fileID: 11400000, guid: 71b8d0b26f8adcd4080902cc584ad9f1, type: 2}
+  levelFont: {fileID: 11400000, guid: 71b8d0b26f8adcd4080902cc584ad9f1, type: 2}
+  healthValueFont: {fileID: 11400000, guid: 01462b999a656a146b0842b8f088a7fa, type: 2}
+  rageValueFont: {fileID: 11400000, guid: 01462b999a656a146b0842b8f088a7fa, type: 2}
+  nameFontSize: 25
+  levelFontSize: 22
+  barValueFontSize: 25
+  showBarValues: 1
+  toggleKey: 22
