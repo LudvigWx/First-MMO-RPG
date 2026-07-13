@@ -1,0 +1,89 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &1486135788259041637
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 6575252691706690378}
+  - component: {fileID: 1147148558727156440}
+  - component: {fileID: 8032260957977834886}
+  m_Layer: 0
+  m_Name: Character Creation
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &6575252691706690378
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1486135788259041637}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 48.25746, y: -0, z: 103.61866}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1147148558727156440
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1486135788259041637}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1127c1df96b7e3945895d8842ea9dc6a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CharacterCreationStep1UI
+  races:
+  - {fileID: 11400000, guid: 96de774a0bdb8024fa77cbb19ffa05e6, type: 2}
+  - {fileID: 11400000, guid: dee040656017fb24da636237ae7a5aff, type: 2}
+  - {fileID: 11400000, guid: ff9b71262c86d5d4f9d5a039783b766b, type: 2}
+  classes:
+  - {fileID: 11400000, guid: d90f9dfa990c1984887e50b91f26a1aa, type: 2}
+  - {fileID: 11400000, guid: 5939658abc9b83f499fbc2aec0f94424, type: 2}
+  - {fileID: 11400000, guid: 7ff3d9f656b083a43a59aaf35210ec34, type: 2}
+  step2UI: {fileID: 8032260957977834886}
+  buttonWidth: 180
+  buttonHeight: 44
+  buttonSpacing: 12
+  sectionSpacing: 26
+  normalButtonColor: {r: 0.18, g: 0.18, b: 0.18, a: 0.95}
+  selectedButtonColor: {r: 0.2, g: 0.55, b: 0.25, a: 1}
+  panelBackground: {r: 0.05, g: 0.05, b: 0.05, a: 0.92}
+--- !u!114 &8032260957977834886
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1486135788259041637}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 32b106d00679b9b468ee6e3068846496, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CharacterCreationStep2UI
+  characterPrefab: {fileID: 354350443408783854, guid: 094cd1418e634464ebab9c4a1fdcbde4, type: 3}
+  previewSpawnPosition: {x: 2000, y: 0, z: 2000}
+  previewTextureSize: 512
+  previewBackgroundColor: {r: 0.12, g: 0.12, b: 0.14, a: 1}
+  buttonWidth: 180
+  rowLabelWidth: 130
+  arrowButtonWidth: 44
+  buttonHeight: 44
+  buttonSpacing: 12
+  sectionSpacing: 18
+  normalButtonColor: {r: 0.18, g: 0.18, b: 0.18, a: 0.95}
+  selectedButtonColor: {r: 0.2, g: 0.55, b: 0.25, a: 1}
+  panelBackground: {r: 0.05, g: 0.05, b: 0.05, a: 0.92}
+  step1UI: {fileID: 0}
