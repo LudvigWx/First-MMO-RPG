@@ -14,6 +14,13 @@ public class Enemy : MonoBehaviour
     [Header("Typ")]
     public bool isBoss = false;   // Bocka i denna för bossar
 
+    [Header("Belöning (skalar automatiskt med nivå + boss)")]
+    public int xpPerLevel = 15;         // XP-bas per fiendenivå (nivå 5 fiende → 5x detta, innan boss-bonus)
+    public float bossXpMultiplier = 3f; // Bossar ger XP x detta extra
+
+    // Räknas ut automatiskt utifrån level/isBoss ovan — ingen manuell siffra att hålla koll på per fiende.
+    public int XpReward => Mathf.RoundToInt(level * xpPerLevel * (isBoss ? bossXpMultiplier : 1f));
+
     [Header("Health-regen (utanför strid)")]
     public float regenDelay = 4f;        // Sekunder utan att ta skada innan regen startar
     public float regenPerSecond = 10f;   // Hur mycket HP som återfås per sekund
@@ -26,6 +33,7 @@ public class Enemy : MonoBehaviour
     private Vector3 spawnPos;
     private Quaternion spawnRot;
     private TargetingController targeting;
+    private EnemyAI enemyAI;
 
     void Awake()
     {
@@ -38,6 +46,7 @@ public class Enemy : MonoBehaviour
     {
         // Hitta spelarens targeting-script så vi kan avmarkera oss själva när vi dör
         targeting = FindFirstObjectByType<TargetingController>();
+        enemyAI = GetComponent<EnemyAI>();
     }
 
     void Update()
@@ -106,6 +115,10 @@ public class Enemy : MonoBehaviour
         regenCarry = 0f;
         lastDamageTime = Time.time;
         SetVisible(true);
+
+        // Nollställ AI:t helt — annars fryser den kvar i Attacking/Chasing från dödsögonblicket
+        // och kan jaga spelaren direkt, även på långt håll.
+        if (enemyAI != null) enemyAI.ResetAI();
 
         Debug.Log(enemyName + " respawnade.");
     }

@@ -41,22 +41,27 @@ public class HotbarUI : MonoBehaviour
         RectTransform root = BuildRoot(canvas.transform);
         BuildAbilityRow(root);
         BuildQuickItemGrid(root);
+
+        // Gör hela Hotbar-blocket flyttbart i Edit Mode (se HudEditModeController).
+        HudDragHandle handle = root.gameObject.AddComponent<HudDragHandle>();
+        handle.saveKey = "hud_hotbar";
     }
 
     // ---------- Canvas / EventSystem ----------
 
     Canvas EnsureCanvas()
     {
-        Canvas existing = FindFirstObjectByType<Canvas>();
+        GameObject existingGO = GameObject.Find("PlayerHudCanvas");
+        Canvas existing = existingGO != null ? existingGO.GetComponent<Canvas>() : null;
         if (existing != null) return existing;
 
-        GameObject canvasGO = new GameObject("HotbarCanvas", typeof(Canvas), typeof(CanvasScaler), typeof(GraphicRaycaster));
+        GameObject canvasGO = new GameObject("PlayerHudCanvas", typeof(Canvas), typeof(CanvasScaler), typeof(GraphicRaycaster));
         Canvas canvas = canvasGO.GetComponent<Canvas>();
         canvas.renderMode = RenderMode.ScreenSpaceOverlay;
 
         CanvasScaler scaler = canvasGO.GetComponent<CanvasScaler>();
-        scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
-        scaler.referenceResolution = new Vector2(1920, 1080);
+        scaler.uiScaleMode = CanvasScaler.ScaleMode.ConstantPixelSize;
+        scaler.scaleFactor = 1f;
         return canvas;
     }
 

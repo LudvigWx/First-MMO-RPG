@@ -11,8 +11,30 @@ public class TargetFrameUI : MonoBehaviour
     public TMP_Text levelText;
     public Image healthFill;
 
+    // Sätts av OptionsMenuController när ingen fiende är vald men spelaren ändå
+    // vill förhandsgranska Enemy HUD Scale-slidern. Så länge den är true rör
+    // Update() varken synlighet eller text/health — det sköter OptionsMenuController.
+    [HideInInspector] public bool previewMode = false;
+
+    void Start()
+    {
+        // Gör hela Enemy HUD-panelen flyttbar i Edit Mode (se HudEditModeController).
+        if (panel != null)
+        {
+            HudDragHandle handle = panel.GetComponent<HudDragHandle>();
+            if (handle == null) handle = panel.AddComponent<HudDragHandle>();
+            handle.saveKey = "hud_enemyhud";
+        }
+    }
+
     void Update()
     {
+        if (previewMode)
+        {
+            if (panel != null) panel.SetActive(true);
+            return;
+        }
+
         // Vem har spelaren valt?
         Enemy target = targeting != null ? targeting.CurrentTarget : null;
 

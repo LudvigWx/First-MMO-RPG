@@ -34,6 +34,14 @@ public class EnemyAI : MonoBehaviour
     private Vector3 spawnPos;
     private float nextAttackTime = 0f;
 
+    // Sätts av t.ex. BossSlamAttack medan en telegraferad specialattack förbereds — fryser
+    // hela AI:t (ingen rörelse/vanlig attack) så bossen står still under förvarningen.
+    public bool IsCasting = false;
+
+    // Används av BossSlamAttack för att inte trigga en specialattack innan bossen ens har
+    // märkt spelaren (annars kunde Slam trigga på ett större avstånd än aggroRange).
+    public bool IsEngaged => state == State.Chasing || state == State.Attacking;
+
     void Awake()
     {
         if (enemy == null) enemy = GetComponent<Enemy>();
@@ -48,7 +56,7 @@ public class EnemyAI : MonoBehaviour
 
     void Update()
     {
-        if (enemy == null || enemy.IsDead || player == null) return;
+        if (enemy == null || enemy.IsDead || player == null || IsCasting) return;
 
         float distToPlayer = Vector3.Distance(transform.position, player.position);
         float distFromSpawn = Vector3.Distance(transform.position, spawnPos);
@@ -115,5 +123,13 @@ public class EnemyAI : MonoBehaviour
         {
             playerHealth.TakeDamage(attackDamage);
         }
+    }
+
+    // Kallas av Enemy.cs vid respawn — annars fryser state (t.ex. Attacking/Chasing)
+    // kvar från dödsögonblicket och fienden jagar dig direkt även om du sprang långt bort.
+    public void ResetAI()
+    {
+        state = State.Idle;
+        nextAttackTime = 0f;
     }
 }
