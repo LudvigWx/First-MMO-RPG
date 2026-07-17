@@ -48,7 +48,10 @@ namespace Naxestra.UI
                     if (gameplayPanel && gameplayPanel.activeSelf) { ShowMain(); return; }
                     CloseMenu();
                 }
-                else
+                // Öppna BARA om inget annat UI-lager (t.ex. Journal) redan ligger överst - annars
+                // ska Escape stänga det istället för att lägga Pause-menyn ovanpå det. Se
+                // UITopLevelTracker/JournalController för samordningen.
+                else if (UITopLevelTracker.TopLayer == UITopLevelTracker.Layer.None)
                 {
                     OpenMenu();
                 }
@@ -58,6 +61,7 @@ namespace Naxestra.UI
         public void OpenMenu()
         {
             IsOpen = true;
+            UITopLevelTracker.NotifyOpened(UITopLevelTracker.Layer.Pause);
             if (pauseRoot) pauseRoot.SetActive(true);
             ShowMain();
             SetGameplayInput(false);
@@ -69,6 +73,7 @@ namespace Naxestra.UI
         public void CloseMenu()
         {
             IsOpen = false;
+            UITopLevelTracker.NotifyClosed(UITopLevelTracker.Layer.Pause);
             if (pauseRoot) pauseRoot.SetActive(false);
             SetGameplayInput(true);
             SetCursor(false);
@@ -142,8 +147,32 @@ namespace Naxestra.UI
         public void OnLogout()
         {
             if (freezeTimeInSingleplayer) Time.timeScale = 1f;
+            SaveCurrentCharacter();
             Debug.Log("[EscapeMenu] Logout — koppla in SceneManager.LoadScene(\"CharacterSelect\") här.");
             // UnityEngine.SceneManagement.SceneManager.LoadScene("CharacterSelect");
+        }
+
+        // Sparar spelarens nuvarande karaktär till lokal fil innan utloggning (se SaveSystem).
+        private void SaveCurrentCharacter()
+        {
+            PlayerExperience experience = FindFirstObjectByType<PlayerExperience>();
+
+            SaveData data = new SaveData
+            {
+                raceName = CharacterCreationSelection.chosenRace != null ? CharacterCreationSelection.chosenRace.raceName : null,
+                className = CharacterCreationSelection.chosenClass != null ? CharacterCreationSelection.chosenClass.className : null,
+                subclassName = CharacterCreationSelection.chosenSubclassName,
+                isMale = CharacterCreationSelection.isMale,
+                level = experience != null ? experience.level : 1,
+                currentXP = experience != null ? experience.currentXP : 0,
+                lastZoneName = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name,
+                lastPosition = experience != null ? experience.transform.position : Vector3.zero,
+                activeQuests = QuestManager.Instance != null ? QuestManager.Instance.GetActiveQuestsForSave() : new System.Collections.Generic.List<QuestProgress>(),
+                completedQuestIds = QuestManager.Instance != null ? QuestManager.Instance.GetCompletedQuestIdsForSave() : new System.Collections.Generic.List<string>()
+            };
+
+            SaveSystem.SaveGame(data);
+            Debug.Log("[SaveSystem] Karaktär sparad (" + data.raceName + " " + data.className + ", nivå " + data.level + ").");
         }
 
         public void OnExit()

@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using System.Collections.Generic;
+using TMPro;
 
 namespace Naxestra.UI
 {
@@ -14,15 +15,20 @@ namespace Naxestra.UI
         [SerializeField] private UnityEngine.UI.Toggle fullEditModeToggle;
         [SerializeField] private GameObject fullEditModeSubPanel;
         [SerializeField] private UnityEngine.UI.Slider portraitScaleSlider;
+        [SerializeField] private UnityEngine.UI.Slider abilityScaleSlider;
+        [SerializeField] private UnityEngine.UI.Slider quickScaleSlider;
         [SerializeField] private UnityEngine.UI.Toggle healthNumbersToggle;
         [SerializeField] private UnityEngine.UI.Toggle rageNumbersToggle;
         [SerializeField] private UnityEngine.UI.Toggle xpNumbersToggle;
+        [SerializeField] private TMP_Dropdown abilityLayoutDropdown;
+        [SerializeField] private TMP_Dropdown quickItemLayoutDropdown;
 
         [Header("Mål (hittas automatiskt om tomma)")]
         [SerializeField] private Transform hudRoot;
         [SerializeField] private Transform hotbarRoot;
         [SerializeField] private Transform enemyHudRoot;
         [SerializeField] private PlayerHudUI playerHudUI;
+        [SerializeField] private HotbarUI hotbarUI;
 
         private readonly List<HudDragHandle> handles = new List<HudDragHandle>();
         private TargetFrameUI targetFrame;
@@ -33,9 +39,24 @@ namespace Naxestra.UI
             if (optionsController == null) optionsController = FindFirstObjectByType<OptionsMenuController>();
             if (fullEditModeToggle != null) fullEditModeToggle.onValueChanged.AddListener(OnFullEditModeChanged);
             if (portraitScaleSlider != null) portraitScaleSlider.onValueChanged.AddListener(OnPortraitScaleChanged);
+            if (abilityScaleSlider != null) abilityScaleSlider.onValueChanged.AddListener(OnAbilityScaleChanged);
+            if (quickScaleSlider != null) quickScaleSlider.onValueChanged.AddListener(OnQuickScaleChanged);
             if (healthNumbersToggle != null) healthNumbersToggle.onValueChanged.AddListener(OnHealthNumbersChanged);
             if (rageNumbersToggle != null) rageNumbersToggle.onValueChanged.AddListener(OnRageNumbersChanged);
             if (xpNumbersToggle != null) xpNumbersToggle.onValueChanged.AddListener(OnXpNumbersChanged);
+
+            if (abilityLayoutDropdown != null)
+            {
+                abilityLayoutDropdown.ClearOptions();
+                abilityLayoutDropdown.AddOptions(new List<string>(HotbarUI.AbilityColumnLabels));
+                abilityLayoutDropdown.onValueChanged.AddListener(OnAbilityLayoutChanged);
+            }
+            if (quickItemLayoutDropdown != null)
+            {
+                quickItemLayoutDropdown.ClearOptions();
+                quickItemLayoutDropdown.AddOptions(new List<string>(HotbarUI.QuickColumnLabels));
+                quickItemLayoutDropdown.onValueChanged.AddListener(OnQuickItemLayoutChanged);
+            }
         }
 
         private void OnEnable()
@@ -46,6 +67,7 @@ namespace Naxestra.UI
             HudDragHandle.EditModeActive = true;
             foreach (HudDragHandle h in handles) h.ApplyEditVisual();
             if (playerHudUI != null) playerHudUI.RefreshEditVisuals();
+            if (hotbarUI != null) hotbarUI.RefreshEditVisuals();
 
             SyncControlsFromPlayerHud();
 
@@ -57,18 +79,30 @@ namespace Naxestra.UI
             HudDragHandle.EditModeActive = false;
             foreach (HudDragHandle h in handles) h.ApplyEditVisual();
             if (playerHudUI != null) playerHudUI.RefreshEditVisuals();
+            if (hotbarUI != null) hotbarUI.RefreshEditVisuals();
 
             StopEnemyHudPreview();
         }
 
-        // Kopplas till fullEditModeToggle.onValueChanged av EscapeMenuBuilder.
+        // Kopplas till fullEditModeToggle.onValueChanged av EscapeMenuBuilder. Styr BÅDE
+        // PlayerHudUI (Health/Rage/XP/Portrait) och HotbarUI (Ability/Quick Item) — en
+        // gemensam kryssruta för allt som kan brytas loss till individuella element.
         public void OnFullEditModeChanged(bool on)
         {
             if (playerHudUI == null) playerHudUI = FindFirstObjectByType<PlayerHudUI>();
-            if (playerHudUI == null) return;
+            if (playerHudUI != null)
+            {
+                playerHudUI.SetFullEditMode(on);
+                playerHudUI.RefreshEditVisuals();
+            }
 
-            playerHudUI.SetFullEditMode(on);
-            playerHudUI.RefreshEditVisuals();
+            if (hotbarUI == null) hotbarUI = FindFirstObjectByType<HotbarUI>();
+            if (hotbarUI != null)
+            {
+                hotbarUI.SetFullEditMode(on);
+                hotbarUI.RefreshEditVisuals();
+            }
+
             foreach (HudDragHandle h in handles) h.ApplyEditVisual();
             UpdateSubPanelVisibility();
         }
@@ -97,6 +131,35 @@ namespace Naxestra.UI
             if (playerHudUI != null) playerHudUI.SetXpNumbersVisible(on);
         }
 
+        public void OnAbilityScaleChanged(float scale)
+        {
+            if (hotbarUI == null) hotbarUI = FindFirstObjectByType<HotbarUI>();
+            if (hotbarUI != null) hotbarUI.SetAbilityScale(scale);
+        }
+
+        public void OnQuickScaleChanged(float scale)
+        {
+            if (hotbarUI == null) hotbarUI = FindFirstObjectByType<HotbarUI>();
+            if (hotbarUI != null) hotbarUI.SetQuickScale(scale);
+        }
+
+        // Kopplas till abilityLayoutDropdown/quickItemLayoutDropdown.onValueChanged av EscapeMenuBuilder.
+        public void OnAbilityLayoutChanged(int index)
+        {
+            if (hotbarUI == null) hotbarUI = FindFirstObjectByType<HotbarUI>();
+            if (hotbarUI == null) return;
+            index = Mathf.Clamp(index, 0, HotbarUI.AbilityColumnOptions.Length - 1);
+            hotbarUI.SetAbilityColumns(HotbarUI.AbilityColumnOptions[index]);
+        }
+
+        public void OnQuickItemLayoutChanged(int index)
+        {
+            if (hotbarUI == null) hotbarUI = FindFirstObjectByType<HotbarUI>();
+            if (hotbarUI == null) return;
+            index = Mathf.Clamp(index, 0, HotbarUI.QuickColumnOptions.Length - 1);
+            hotbarUI.SetQuickColumns(HotbarUI.QuickColumnOptions[index]);
+        }
+
         // Sätter aktiv/inaktiv på undersektionen och tvingar sedan fram en omritning av HELA
         // panelen. Utan detta hann inte VerticalLayoutGroup/ContentSizeFitter reagera på att
         // undersektionen dök upp/försvann, så resten av panelen kunde bli kvar i fel positioner
@@ -114,13 +177,31 @@ namespace Naxestra.UI
         // samma värde igen). Körs när panelen öppnas, efter Full Edit Mode-byte och Standard.
         private void SyncControlsFromPlayerHud()
         {
-            if (playerHudUI == null) return;
+            if (playerHudUI != null)
+            {
+                if (fullEditModeToggle != null) fullEditModeToggle.SetIsOnWithoutNotify(playerHudUI.IsFullEditModeOn);
+                if (portraitScaleSlider != null) portraitScaleSlider.SetValueWithoutNotify(playerHudUI.GetPortraitScale());
+                if (healthNumbersToggle != null) healthNumbersToggle.SetIsOnWithoutNotify(playerHudUI.GetHealthNumbersVisible());
+                if (rageNumbersToggle != null) rageNumbersToggle.SetIsOnWithoutNotify(playerHudUI.GetRageNumbersVisible());
+                if (xpNumbersToggle != null) xpNumbersToggle.SetIsOnWithoutNotify(playerHudUI.GetXpNumbersVisible());
+            }
 
-            if (fullEditModeToggle != null) fullEditModeToggle.SetIsOnWithoutNotify(playerHudUI.IsFullEditModeOn);
-            if (portraitScaleSlider != null) portraitScaleSlider.SetValueWithoutNotify(playerHudUI.GetPortraitScale());
-            if (healthNumbersToggle != null) healthNumbersToggle.SetIsOnWithoutNotify(playerHudUI.GetHealthNumbersVisible());
-            if (rageNumbersToggle != null) rageNumbersToggle.SetIsOnWithoutNotify(playerHudUI.GetRageNumbersVisible());
-            if (xpNumbersToggle != null) xpNumbersToggle.SetIsOnWithoutNotify(playerHudUI.GetXpNumbersVisible());
+            if (hotbarUI == null) hotbarUI = FindFirstObjectByType<HotbarUI>();
+            if (hotbarUI != null)
+            {
+                if (abilityLayoutDropdown != null)
+                {
+                    int idx = System.Array.IndexOf(HotbarUI.AbilityColumnOptions, hotbarUI.GetAbilityColumns());
+                    abilityLayoutDropdown.SetValueWithoutNotify(Mathf.Max(0, idx));
+                }
+                if (quickItemLayoutDropdown != null)
+                {
+                    int idx = System.Array.IndexOf(HotbarUI.QuickColumnOptions, hotbarUI.GetQuickColumns());
+                    quickItemLayoutDropdown.SetValueWithoutNotify(Mathf.Max(0, idx));
+                }
+                if (abilityScaleSlider != null) abilityScaleSlider.SetValueWithoutNotify(hotbarUI.GetAbilityScale());
+                if (quickScaleSlider != null) quickScaleSlider.SetValueWithoutNotify(hotbarUI.GetQuickScale());
+            }
 
             UpdateSubPanelVisibility();
         }
@@ -146,6 +227,7 @@ namespace Naxestra.UI
             }
 
             if (playerHudUI == null) playerHudUI = FindFirstObjectByType<PlayerHudUI>();
+            if (hotbarUI == null) hotbarUI = FindFirstObjectByType<HotbarUI>();
         }
 
         private void EnsureHandles()
@@ -205,6 +287,14 @@ namespace Naxestra.UI
                 playerHudUI.ResetFullModeElements();
                 playerHudUI.RefreshEditVisuals();
             }
+
+            if (hotbarUI == null) hotbarUI = FindFirstObjectByType<HotbarUI>();
+            if (hotbarUI != null)
+            {
+                hotbarUI.ResetLayoutToDefault();
+                hotbarUI.RefreshEditVisuals();
+            }
+
             foreach (HudDragHandle h in handles) h.ApplyEditVisual();
 
             SyncControlsFromPlayerHud();

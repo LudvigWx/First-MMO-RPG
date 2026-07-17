@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 4673700592045263148}
   - component: {fileID: 8628387112565951292}
   - component: {fileID: 4574569018570465763}
+  - component: {fileID: 7233086466169329145}
   m_Layer: 0
   m_Name: Enemy_Sven (BOSS)
   m_TagString: Enemy
@@ -28,7 +29,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4500158350264945539}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: 0.9847272, z: -0, w: 0.17410472}
+  m_LocalRotation: {x: 0, y: 0.9847274, z: 0, w: 0.17410365}
   m_LocalPosition: {x: -4.377671, y: 0.14460623, z: 9.5906105}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -48,11 +49,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7ead4bff5427d6a459dcd732a96a1323, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Enemy
-  enemyName: Roger
+  enemyName: Sven
   level: 10
   maxHealth: 200
   currentHealth: 100
   isBoss: 1
+  xpPerLevel: 15
+  bossXpMultiplier: 3
   regenDelay: 4
   regenPerSecond: 5
   respawnTime: 60
@@ -76,6 +79,7 @@ MonoBehaviour:
   attackDamage: 15
   attackCooldown: 2
   moveSpeed: 2
+  IsCasting: 0
 --- !u!54 &8628387112565951292
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -124,6 +128,29 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 0.6, y: 1.8, z: 0.6}
   m_Center: {x: 0, y: 0.9, z: 0}
+--- !u!114 &7233086466169329145
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4500158350264945539}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 398ba6aa1d622834e8ed4898976ae29a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BossSlamAttack
+  enemy: {fileID: 0}
+  enemyAI: {fileID: 0}
+  playerHealth: {fileID: 0}
+  triggerRange: 10
+  telegraphDuration: 1.5
+  slamRadius: 2
+  slamDamage: 40
+  slamCooldown: 9
+  firstSlamDelay: 5
+  telegraphColor: {r: 0.9, g: 0.1, b: 0.1, a: 1}
+  blinkInterval: 0.15
 --- !u!1001 &7401838702624742363
 PrefabInstance:
   m_ObjectHideFlags: 0

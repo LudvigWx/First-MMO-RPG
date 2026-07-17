@@ -129,6 +129,16 @@ public static class EscapeMenuBuilder
         go.transform.SetParent(parent, false);
         StretchFull(go.GetComponent<RectTransform>());
         go.GetComponent<Image>().color = new Color(0f, 0f, 0f, 180f / 255f);
+
+        // Egen dimmer-tema-asset (INTE samma som GetFantasyPanelTheme()) med flit — PauseRoot
+        // ska mörklägga hela skärmen, inte visa samma pergament-panel som MainPanel/OptionsPanel/
+        // GameplayPanel. Genom att peka på en separat, namngiven asset (som du duplicerar och gör
+        // svart/halvgenomskinlig en gång) överlever din anpassning varje ombyggnad av menyn —
+        // .asset-filen ligger kvar på disk oavsett hur många gånger Build() river/skapar om scenen.
+        ThemedPanel themedPanel = go.AddComponent<ThemedPanel>();
+        themedPanel.theme = GetFantasyPauseDimTheme();
+        themedPanel.Apply();
+
         return go;
     }
 
@@ -149,12 +159,13 @@ public static class EscapeMenuBuilder
     private static GameObject CreateMainPanel(Transform parent, PauseMenuController controller)
     {
         GameObject panel = CreatePanelBase("MainPanel", parent, TextAnchor.MiddleCenter);
+        ButtonTheme buttonTheme = GetFantasyButtonTheme();
 
-        CreateMenuButton(panel.transform, "Resume", controller.OnResume);
-        CreateMenuButton(panel.transform, "Logout", controller.OnLogout);
-        CreateMenuButton(panel.transform, "Options", controller.ShowOptions);
-        CreateMenuButton(panel.transform, "Gameplay", controller.ShowGameplay);
-        CreateMenuButton(panel.transform, "Exit", controller.OnExit);
+        CreateMenuButton(panel.transform, "Resume", controller.OnResume, buttonTheme);
+        CreateMenuButton(panel.transform, "Logout", controller.OnLogout, buttonTheme);
+        CreateMenuButton(panel.transform, "Options", controller.ShowOptions, buttonTheme);
+        CreateMenuButton(panel.transform, "Gameplay", controller.ShowGameplay, buttonTheme);
+        CreateMenuButton(panel.transform, "Exit", controller.OnExit, buttonTheme);
 
         return panel;
     }
@@ -171,7 +182,7 @@ public static class EscapeMenuBuilder
         TMP_Dropdown resolutionDropdown = CreateLabeledDropdown(panel.transform, "Resolution");
 
         CreateMenuButton(panel.transform, "Edit Mode", controller.ShowEditMode);
-        CreateMenuButton(panel.transform, "Back", controller.ShowMain);
+        CreateMenuButton(panel.transform, "Back", controller.ShowMain, GetFantasyButtonTheme());
 
         OptionsMenuController optionsController = panel.AddComponent<OptionsMenuController>();
 
@@ -218,6 +229,11 @@ public static class EscapeMenuBuilder
         Slider hotbarScaleSlider = CreateLabeledSlider(panel.transform, "Hotbar Scale", 0.8f, 1.4f, 1f);
         Slider enemyHudScaleSlider = CreateLabeledSlider(panel.transform, "Enemy HUD Scale", 0.8f, 1.4f, 1f);
 
+        // Kolumn-layout för hotbaren (t.ex. 1x8/2x4/4x2/8x1) — inte gated bakom Full Edit Mode,
+        // eftersom Ability- och Quick Item-grupperna redan går att dra fritt utan den.
+        TMP_Dropdown abilityLayoutDropdown = CreateLabeledDropdown(panel.transform, "Ability Slot Layout");
+        TMP_Dropdown quickItemLayoutDropdown = CreateLabeledDropdown(panel.transform, "Quick Item Layout");
+
         Toggle fullEditModeToggle = CreateLabeledToggle(panel.transform, "Full Edit Mode", false);
 
         GameObject subPanel = new GameObject("FullEditModeSubPanel", typeof(RectTransform), typeof(VerticalLayoutGroup));
@@ -233,6 +249,8 @@ public static class EscapeMenuBuilder
         subFitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
 
         Slider portraitScaleSlider = CreateLabeledSlider(subPanel.transform, "Portrait Scale", 0.5f, 2.5f, 1f);
+        Slider abilityScaleSlider = CreateLabeledSlider(subPanel.transform, "Ability Scale", 0.5f, 2.5f, 1f);
+        Slider quickScaleSlider = CreateLabeledSlider(subPanel.transform, "Quick Item Scale", 0.5f, 2.5f, 1f);
         Toggle healthNumbersToggle = CreateLabeledToggle(subPanel.transform, "Show Health Numbers", true);
         Toggle rageNumbersToggle = CreateLabeledToggle(subPanel.transform, "Show Rage Numbers", true);
         Toggle xpNumbersToggle = CreateLabeledToggle(subPanel.transform, "Show XP Numbers", true);
@@ -249,9 +267,13 @@ public static class EscapeMenuBuilder
         editSo.FindProperty("fullEditModeToggle").objectReferenceValue = fullEditModeToggle;
         editSo.FindProperty("fullEditModeSubPanel").objectReferenceValue = subPanel;
         editSo.FindProperty("portraitScaleSlider").objectReferenceValue = portraitScaleSlider;
+        editSo.FindProperty("abilityScaleSlider").objectReferenceValue = abilityScaleSlider;
+        editSo.FindProperty("quickScaleSlider").objectReferenceValue = quickScaleSlider;
         editSo.FindProperty("healthNumbersToggle").objectReferenceValue = healthNumbersToggle;
         editSo.FindProperty("rageNumbersToggle").objectReferenceValue = rageNumbersToggle;
         editSo.FindProperty("xpNumbersToggle").objectReferenceValue = xpNumbersToggle;
+        editSo.FindProperty("abilityLayoutDropdown").objectReferenceValue = abilityLayoutDropdown;
+        editSo.FindProperty("quickItemLayoutDropdown").objectReferenceValue = quickItemLayoutDropdown;
         editSo.ApplyModifiedPropertiesWithoutUndo();
 
         SerializedObject optSo = new SerializedObject(optionsController);
@@ -288,6 +310,10 @@ public static class EscapeMenuBuilder
         vlg.childControlHeight = false;
         vlg.childForceExpandWidth = true;
         vlg.childForceExpandHeight = false;
+
+        ThemedPanel themedPanel = panel.AddComponent<ThemedPanel>();
+        themedPanel.theme = GetFantasyPanelTheme();
+        themedPanel.Apply();
 
         return panel;
     }
@@ -330,7 +356,7 @@ public static class EscapeMenuBuilder
         return new TMP_DefaultControls.Resources();
     }
 
-    private static Button CreateMenuButton(Transform parent, string label, UnityAction callback)
+    private static Button CreateMenuButton(Transform parent, string label, UnityAction callback, ButtonTheme theme = null)
     {
         GameObject go = TMP_DefaultControls.CreateButton(GetTmpResources());
         go.name = label + "Button";
@@ -354,6 +380,13 @@ public static class EscapeMenuBuilder
         UnityEventTools.AddPersistentListener(button.onClick, callback);
         int idx = button.onClick.GetPersistentEventCount() - 1;
         button.onClick.SetPersistentListenerState(idx, UnityEventCallState.RuntimeOnly);
+
+        if (theme != null)
+        {
+            ThemedButton themedButton = go.AddComponent<ThemedButton>();
+            themedButton.theme = theme;
+            themedButton.Apply();
+        }
 
         return button;
     }
@@ -486,4 +519,29 @@ public static class EscapeMenuBuilder
         rt.offsetMax = Vector2.zero;
     }
 
+    // ---------- UI-teman (Fantasy Wooden GUI) ----------
+    // Laddas via AssetDatabase istället för direkta fältreferenser, så Build() inte kastar
+    // fel om NaxestraThemeSetup (Tools > Naxestra > Setup Fantasy Wooden Theme) inte körts än
+    // — knapparna/panelerna får då bara ingen ThemedButton/ThemedPanel-koppling denna gång.
+    private const string ThemesFolder = "Assets/Themes/FantasyWooden";
+
+    private static ButtonTheme GetFantasyButtonTheme()
+    {
+        return AssetDatabase.LoadAssetAtPath<ButtonTheme>(ThemesFolder + "/FantasyWooden_Button.asset");
+    }
+
+    private static PanelTheme GetFantasyPanelTheme()
+    {
+        return AssetDatabase.LoadAssetAtPath<PanelTheme>(ThemesFolder + "/FantasyWooden_Panel.asset");
+    }
+
+    // Separat asset för PauseRoots helskärms-dimmer (se CreatePauseRoot). Skapa den genom att
+    // duplicera FantasyWooden_Panel.asset, döpa kopian till exakt "FantasyWooden_Panel_Dim",
+    // rensa Background Sprite (None) och sätta Tint till svart med låg alpha (~180/255).
+    // Finns den inte än (fil saknas) blir themedPanel.theme null — PauseRoot behåller då bara
+    // sin vanliga hårdkodade svarta färg, precis som innan temasystemet fanns.
+    private static PanelTheme GetFantasyPauseDimTheme()
+    {
+        return AssetDatabase.LoadAssetAtPath<PanelTheme>(ThemesFolder + "/FantasyWooden_Panel_Dim.asset");
+    }
 }

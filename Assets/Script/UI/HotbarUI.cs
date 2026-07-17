@@ -26,6 +26,39 @@ public class HotbarUI : MonoBehaviour
     public int quickSlotSpacing = 8;
     public int groupSpacing = 24;
 
+    [Header("Utseende – slot-teman (valfritt)")]
+    public SlotTheme abilitySlotTheme;
+    public SlotTheme quickSlotTheme;
+
+    // Layout-presets (kolumn-antal) för Edit Mode-panelen (HudEditModeController).
+    // Index i *ColumnOptions/*ColumnLabels måste matcha varandra (parallella arrayer).
+    public static readonly int[] AbilityColumnOptions = { 8, 4, 2, 1 };
+    public static readonly string[] AbilityColumnLabels = { "1 rad (1x8)", "2 rader (2x4)", "4 rader (4x2)", "8 rader (8x1)" };
+    public static readonly int[] QuickColumnOptions = { 2, 4, 1 };
+    public static readonly string[] QuickColumnLabels = { "2x2", "1 rad (1x4)", "4 rader (4x1)" };
+
+    const string K_ABILITY_COLUMNS = "hud_hotbar_ability_columns";
+    const string K_QUICK_COLUMNS = "hud_hotbar_quick_columns";
+    const string K_ABILITY_SCALE = "hud_hotbar_ability_scale";
+    const string K_QUICK_SCALE = "hud_hotbar_quick_scale";
+    const string K_ABILITY_POS = "hud_hotbar_abilities";
+    const string K_QUICK_POS = "hud_hotbar_quickitems";
+    // Delar samma PlayerPrefs-nyckel som PlayerHudUI (en gemensam Full Edit Mode-kryssruta
+    // styr både HUD-barerna och hotbaren, se HudEditModeController.OnFullEditModeChanged).
+    const string K_FULL_EDIT = "hud_full_edit_mode";
+    const int DefaultAbilityColumns = 8;
+    const int DefaultQuickColumns = 2;
+
+    GridLayoutGroup abilityGrid;
+    RectTransform abilityRootRT;
+    GridLayoutGroup quickGrid;
+    RectTransform quickRootRT;
+    Transform canvasTransform;
+    Transform hotbarRootTransform;
+    int abilitySiblingIndex;
+    int quickSiblingIndex;
+    bool fullEditModeOn;
+
     void Start()
     {
         if (caster == null) caster = FindFirstObjectByType<AbilityCaster>();
@@ -37,14 +70,155 @@ public class HotbarUI : MonoBehaviour
 
         Canvas canvas = EnsureCanvas();
         EnsureEventSystem();
+        canvasTransform = canvas.transform;
 
+        // HotbarRoot håller Ability- och Quick Item-gruppen ihop sida vid sida som EN enhet
+        // (HorizontalLayoutGroup) i normalläge — de bryts bara loss till individuellt
+        // dragbara/skalbara block när Full Edit Mode slås på, se SetFullEditMode.
         RectTransform root = BuildRoot(canvas.transform);
-        BuildAbilityRow(root);
-        BuildQuickItemGrid(root);
+        hotbarRootTransform = root;
+        abilityRootRT = BuildAbilityGroup(root);
+        quickRootRT = BuildQuickItemGroup(root);
+        abilitySiblingIndex = abilityRootRT.GetSiblingIndex();
+        quickSiblingIndex = quickRootRT.GetSiblingIndex();
 
-        // Gör hela Hotbar-blocket flyttbart i Edit Mode (se HudEditModeController).
-        HudDragHandle handle = root.gameObject.AddComponent<HudDragHandle>();
-        handle.saveKey = "hud_hotbar";
+        // Gör hela Hotbar-blocket flyttbart som EN enhet (döljs i Full Edit Mode eftersom
+        // rooten då är tom — barnen är utflyttade till canvasen, se hideWhenFullEditModeActive).
+        HudDragHandle rootHandle = root.gameObject.AddComponent<HudDragHandle>();
+        rootHandle.saveKey = "hud_hotbar";
+        rootHandle.hideWhenFullEditModeActive = true;
+
+        if (PlayerPrefs.GetInt(K_FULL_EDIT, 0) == 1) SetFullEditMode(true);
+    }
+
+    // ---------- Full Edit Mode (Ability/Quick Item individuellt, annars ihop som en enhet) ----------
+
+    // Kallas av HudEditModeController (samma Full Edit Mode-kryssruta som PlayerHudUI).
+    public void SetFullEditMode(bool on)
+    {
+        if (fullEditModeOn == on) return;
+        fullEditModeOn = on;
+        HudDragHandle.FullEditModeActive = on;
+
+        if (on)
+        {
+            DetachGroup(abilityRootRT, K_ABILITY_POS, GetAbilityScale());
+            DetachGroup(quickRootRT, K_QUICK_POS, GetQuickScale());
+        }
+        else
+        {
+            ReattachGroup(abilityRootRT, abilitySiblingIndex);
+            ReattachGroup(quickRootRT, quickSiblingIndex);
+            LayoutRebuilder.ForceRebuildLayoutImmediate((RectTransform)hotbarRootTransform);
+        }
+
+        RefreshEditVisuals();
+
+        HudDragHandle rootHandle = hotbarRootTransform.GetComponent<HudDragHandle>();
+        if (rootHandle != null) rootHandle.ApplyEditVisual();
+
+        PlayerPrefs.SetInt(K_FULL_EDIT, on ? 1 : 0);
+        PlayerPrefs.Save();
+    }
+
+    public bool IsFullEditModeOn => fullEditModeOn;
+
+    // Kallas av HudEditModeController när Edit Mode-panelen öppnas/stängs, så att
+    // outline/raycast på Ability-/Quick Item-gruppen uppdateras precis som för hudRoot.
+    public void RefreshEditVisuals()
+    {
+        HudDragHandle abilityHandle = abilityRootRT.GetComponent<HudDragHandle>();
+        if (abilityHandle != null) abilityHandle.ApplyEditVisual();
+        HudDragHandle quickHandle = quickRootRT.GetComponent<HudDragHandle>();
+        if (quickHandle != null) quickHandle.ApplyEditVisual();
+    }
+
+    void DetachGroup(RectTransform rt, string posKey, float scale)
+    {
+        Vector3 worldPos = rt.position;
+        rt.SetParent(canvasTransform, false);
+        rt.anchorMin = new Vector2(0f, 0f);
+        rt.anchorMax = new Vector2(0f, 0f);
+        rt.pivot = new Vector2(0f, 0f);
+        rt.position = worldPos;
+
+        if (PlayerPrefs.HasKey(posKey + "_x"))
+        {
+            rt.anchoredPosition = new Vector2(
+                PlayerPrefs.GetFloat(posKey + "_x"),
+                PlayerPrefs.GetFloat(posKey + "_y"));
+        }
+
+        rt.localScale = Vector3.one * scale;
+
+        HudDragHandle handle = rt.GetComponent<HudDragHandle>();
+        if (handle == null) handle = rt.gameObject.AddComponent<HudDragHandle>();
+        handle.saveKey = posKey;
+        handle.requiresFullEditMode = true;
+    }
+
+    void ReattachGroup(RectTransform rt, int siblingIndex)
+    {
+        rt.SetParent(hotbarRootTransform, false);
+        rt.SetSiblingIndex(siblingIndex);
+        rt.localScale = Vector3.one;
+    }
+
+    // Kallas av HudEditModeControllers "Standard"-knapp.
+    public void ResetLayoutToDefault()
+    {
+        SetAbilityColumns(DefaultAbilityColumns);
+        SetQuickColumns(DefaultQuickColumns);
+        SetAbilityScale(1f);
+        SetQuickScale(1f);
+
+        HudDragHandle abilityHandle = abilityRootRT.GetComponent<HudDragHandle>();
+        if (abilityHandle != null) abilityHandle.ResetToDefault();
+        HudDragHandle quickHandle = quickRootRT.GetComponent<HudDragHandle>();
+        if (quickHandle != null) quickHandle.ResetToDefault();
+    }
+
+    // ---------- Skala (var för sig, syns bara som slidrar i Full Edit Mode och är bara
+    // verksam medan gruppen är utflyttad — precis som PlayerHudUI:s Portrait Scale) ----------
+
+    public float GetAbilityScale() => PlayerPrefs.GetFloat(K_ABILITY_SCALE, 1f);
+    public float GetQuickScale() => PlayerPrefs.GetFloat(K_QUICK_SCALE, 1f);
+
+    public void SetAbilityScale(float scale)
+    {
+        PlayerPrefs.SetFloat(K_ABILITY_SCALE, scale);
+        PlayerPrefs.Save();
+        if (fullEditModeOn && abilityRootRT != null) abilityRootRT.localScale = Vector3.one * scale;
+    }
+
+    public void SetQuickScale(float scale)
+    {
+        PlayerPrefs.SetFloat(K_QUICK_SCALE, scale);
+        PlayerPrefs.Save();
+        if (fullEditModeOn && quickRootRT != null) quickRootRT.localScale = Vector3.one * scale;
+    }
+
+    // ---------- Layout-presets ----------
+
+    public int GetAbilityColumns() => abilityGrid != null ? abilityGrid.constraintCount : DefaultAbilityColumns;
+    public int GetQuickColumns() => quickGrid != null ? quickGrid.constraintCount : DefaultQuickColumns;
+
+    public void SetAbilityColumns(int columns)
+    {
+        if (abilityGrid == null) return;
+        abilityGrid.constraintCount = Mathf.Clamp(columns, 1, 8);
+        PlayerPrefs.SetInt(K_ABILITY_COLUMNS, abilityGrid.constraintCount);
+        PlayerPrefs.Save();
+        LayoutRebuilder.ForceRebuildLayoutImmediate(abilityRootRT);
+    }
+
+    public void SetQuickColumns(int columns)
+    {
+        if (quickGrid == null) return;
+        quickGrid.constraintCount = Mathf.Clamp(columns, 1, 4);
+        PlayerPrefs.SetInt(K_QUICK_COLUMNS, quickGrid.constraintCount);
+        PlayerPrefs.Save();
+        LayoutRebuilder.ForceRebuildLayoutImmediate(quickRootRT);
     }
 
     // ---------- Canvas / EventSystem ----------
@@ -101,39 +275,35 @@ public class HotbarUI : MonoBehaviour
         return rt;
     }
 
-    void BuildAbilityRow(RectTransform root)
+    RectTransform BuildAbilityGroup(Transform parent)
     {
-        GameObject rowGO = new GameObject("AbilityRow", typeof(RectTransform), typeof(HorizontalLayoutGroup));
-        RectTransform rowRT = rowGO.GetComponent<RectTransform>();
-        rowRT.SetParent(root, false);
+        GameObject rootGO = new GameObject("HotbarAbilityRoot", typeof(RectTransform), typeof(GridLayoutGroup));
+        RectTransform rt = rootGO.GetComponent<RectTransform>();
+        rt.SetParent(parent, false);
 
-        HorizontalLayoutGroup layout = rowGO.GetComponent<HorizontalLayoutGroup>();
-        layout.spacing = slotSpacing;
-        layout.childAlignment = TextAnchor.MiddleCenter;
-        layout.childForceExpandWidth = false;
-        layout.childForceExpandHeight = false;
-        layout.childControlWidth = false;
-        layout.childControlHeight = false;
+        abilityGrid = rootGO.GetComponent<GridLayoutGroup>();
+        abilityGrid.cellSize = new Vector2(slotSize, slotSize);
+        abilityGrid.spacing = new Vector2(slotSpacing, slotSpacing);
+        abilityGrid.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
+        abilityGrid.constraintCount = Mathf.Clamp(PlayerPrefs.GetInt(K_ABILITY_COLUMNS, DefaultAbilityColumns), 1, 8);
 
-        ContentSizeFitter fitter = rowGO.AddComponent<ContentSizeFitter>();
+        ContentSizeFitter fitter = rootGO.AddComponent<ContentSizeFitter>();
         fitter.horizontalFit = ContentSizeFitter.FitMode.PreferredSize;
         fitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
 
         for (int i = 0; i < 8; i++)
         {
-            BuildAbilitySlot(rowRT, i);
+            BuildAbilitySlot(rt, i);
         }
+
+        return rt;
     }
 
     void BuildAbilitySlot(Transform parent, int index)
     {
-        GameObject slotGO = new GameObject("AbilitySlot_" + (index + 1), typeof(RectTransform), typeof(Image), typeof(Button), typeof(LayoutElement));
+        GameObject slotGO = new GameObject("AbilitySlot_" + (index + 1), typeof(RectTransform), typeof(Image), typeof(Button));
         RectTransform rt = slotGO.GetComponent<RectTransform>();
         rt.SetParent(parent, false);
-
-        LayoutElement le = slotGO.GetComponent<LayoutElement>();
-        le.preferredWidth = slotSize;
-        le.preferredHeight = slotSize;
 
         Image background = slotGO.GetComponent<Image>();
         background.color = slotBackground;
@@ -145,6 +315,11 @@ public class HotbarUI : MonoBehaviour
             outline.effectColor = lockedOutlineColor;
             outline.effectDistance = new Vector2(2f, -2f);
         }
+
+        ThemedSlot themedSlot = slotGO.AddComponent<ThemedSlot>();
+        themedSlot.slotBackground = background;
+        themedSlot.theme = abilitySlotTheme;
+        themedSlot.SetHighlighted(locked);
 
         // Ikon (fyller hela slotten, ligger under cooldown-overlayn)
         GameObject iconGO = new GameObject("Icon", typeof(RectTransform), typeof(Image));
@@ -195,27 +370,28 @@ public class HotbarUI : MonoBehaviour
         button.onClick.AddListener(slotUI.OnClickCast);
     }
 
-    void BuildQuickItemGrid(RectTransform root)
+    RectTransform BuildQuickItemGroup(Transform parent)
     {
-        GameObject gridGO = new GameObject("QuickItemGrid", typeof(RectTransform), typeof(GridLayoutGroup));
-        RectTransform gridRT = gridGO.GetComponent<RectTransform>();
-        gridRT.SetParent(root, false);
+        GameObject rootGO = new GameObject("HotbarQuickItemRoot", typeof(RectTransform), typeof(GridLayoutGroup));
+        RectTransform rt = rootGO.GetComponent<RectTransform>();
+        rt.SetParent(parent, false);
 
-        GridLayoutGroup grid = gridGO.GetComponent<GridLayoutGroup>();
-        grid.cellSize = new Vector2(quickSlotSize, quickSlotSize);
-        grid.spacing = new Vector2(quickSlotSpacing, quickSlotSpacing);
-        grid.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
-        grid.constraintCount = 2;
-        grid.childAlignment = TextAnchor.MiddleCenter;
+        quickGrid = rootGO.GetComponent<GridLayoutGroup>();
+        quickGrid.cellSize = new Vector2(quickSlotSize, quickSlotSize);
+        quickGrid.spacing = new Vector2(quickSlotSpacing, quickSlotSpacing);
+        quickGrid.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
+        quickGrid.constraintCount = Mathf.Clamp(PlayerPrefs.GetInt(K_QUICK_COLUMNS, DefaultQuickColumns), 1, 4);
 
-        LayoutElement gridLE = gridGO.AddComponent<LayoutElement>();
-        gridLE.preferredWidth = quickSlotSize * 2 + quickSlotSpacing;
-        gridLE.preferredHeight = quickSlotSize * 2 + quickSlotSpacing;
+        ContentSizeFitter fitter = rootGO.AddComponent<ContentSizeFitter>();
+        fitter.horizontalFit = ContentSizeFitter.FitMode.PreferredSize;
+        fitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
 
         for (int i = 0; i < 4; i++)
         {
-            BuildQuickItemSlot(gridRT, i);
+            BuildQuickItemSlot(rt, i);
         }
+
+        return rt;
     }
 
     void BuildQuickItemSlot(Transform parent, int index)
@@ -236,6 +412,10 @@ public class HotbarUI : MonoBehaviour
         QuickItemSlotUI slotUI = slotGO.AddComponent<QuickItemSlotUI>();
         slotUI.slotIndex = index;
         slotUI.iconImage = iconImage;
+
+        ThemedSlot themedSlot = slotGO.AddComponent<ThemedSlot>();
+        themedSlot.slotBackground = background;
+        themedSlot.theme = quickSlotTheme;
 
         Button button = slotGO.GetComponent<Button>();
         button.targetGraphic = background;

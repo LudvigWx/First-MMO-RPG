@@ -18,6 +18,8 @@ public class TargetFrameUI : MonoBehaviour
 
     void Start()
     {
+        if (targeting == null) targeting = FindFirstObjectByType<TargetingController>();
+
         // Gör hela Enemy HUD-panelen flyttbar i Edit Mode (se HudEditModeController).
         if (panel != null)
         {

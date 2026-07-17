@@ -47,8 +47,8 @@ public class CombatManager : MonoBehaviour
         {
             case CombatEndReason.EnemyDefeated:
                 string namn = target != null ? target.enemyName : "Fienden";
-                Debug.Log("SEGER! " + namn + " besegrad. (XP delas ut här senare)");
-                EnemyDefeated?.Invoke(target);   // <-- XP-kroken
+                Debug.Log("SEGER! " + namn + " besegrad.");
+                EnemyDefeated?.Invoke(target);   // <-- XP/quest-kroken (PlayerExperience + QuestManager lyssnar)
                 break;
 
             case CombatEndReason.Fled:

@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 // Håller koll på spelarens nivå och XP. Lyssnar på CombatManager.EnemyDefeated
 // och delar ut XP automatiskt vid varje kill. Lägg på PlayerArmature
@@ -28,10 +29,19 @@ public class PlayerExperience : MonoBehaviour
 
     private CombatManager combatManager;
 
+    // Körs i Awake (inte Start) - Unity garanterar att ALLA Awake-anrop i scenen är klara
+    // innan NÅGOT Start-anrop körs. PlayerHudUI.Start() läser experience.level för att sätta
+    // sitt startvärde (lastKnownLevel) - om den laddade nivån inte redan satts i Awake kan
+    // HUD:et hinna se default-nivå 1 först och feltolka den riktiga laddade nivån som en
+    // jätte-level-up (det gav den falska "LEVEL UP + fyll om hela XP-baren"-buggen).
+    void Awake()
+    {
+        LoadFromSaveIfPresent();
+        xpToNextLevel = CalculateXpForLevel(level);
+    }
+
     void Start()
     {
-        xpToNextLevel = CalculateXpForLevel(level);
-
         combatManager = FindFirstObjectByType<CombatManager>();
         if (combatManager != null)
             combatManager.EnemyDefeated += HandleEnemyDefeated;
@@ -43,6 +53,30 @@ public class PlayerExperience : MonoBehaviour
     {
         if (combatManager != null)
             combatManager.EnemyDefeated -= HandleEnemyDefeated;
+    }
+
+    // Om en save-fil finns (se SaveSystem): återställ nivå/XP/position. Ras/klass/subklass/
+    // kön sparas också i filen men laddas inte tillbaka här - inget läser dem i Playground än.
+    // Positionen laddas BARA om lastZoneName matchar scenen som faktiskt startar - annars kan
+    // en position sparad i en annan scen teleportera spelaren utanför kartan (hände i
+    // AshfordGarrison med en position sparad i Playground).
+    void LoadFromSaveIfPresent()
+    {
+        if (!SaveSystem.HasSaveFile()) return;
+
+        SaveData data = SaveSystem.LoadGame();
+        if (data == null) return;
+
+        level = data.level;
+        currentXP = data.currentXP;
+
+        string currentScene = SceneManager.GetActiveScene().name;
+        if (data.lastZoneName == currentScene)
+        {
+            transform.position = data.lastPosition;
+        }
+
+        Debug.Log("[SaveSystem] Karaktär laddad (nivå " + level + ", XP " + currentXP + ").");
     }
 
     void HandleEnemyDefeated(Enemy enemy)

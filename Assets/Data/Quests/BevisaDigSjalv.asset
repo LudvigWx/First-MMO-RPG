@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4fda43b4e2e29884fa8e1706d60fe724, type: 3}
+  m_Name: BevisaDigSjalv
+  m_EditorClassIdentifier: Assembly-CSharp::QuestData
+  questId: bevisa_dig_sjalv
+  title: "Bevisa dig sj\xE4lv"
+  description: "D\xF6da 3 Roger f\xF6r att visa att du \xE4r redo."
+  questGiverId:
+  objectives:
+  - type: 0
+    targetId: Roger
+    requiredAmount: 3
+    description: "D\xF6da Roger (0/3)"
+  rewardXp: 50
+  rewardCurrency: 0
+  rewardItemIds: []
+  prerequisiteQuestIds: []

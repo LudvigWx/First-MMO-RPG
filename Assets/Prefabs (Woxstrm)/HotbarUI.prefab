@@ -53,3 +53,5 @@ MonoBehaviour:
   quickSlotSize: 64
   quickSlotSpacing: 8
   groupSpacing: 24
+  abilitySlotTheme: {fileID: 11400000, guid: 7e1d33a9dc1d9e042a77c77703df78c8, type: 2}
+  quickSlotTheme: {fileID: 11400000, guid: 7e1d33a9dc1d9e042a77c77703df78c8, type: 2}

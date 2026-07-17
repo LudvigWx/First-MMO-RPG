@@ -237,6 +237,8 @@ namespace Naxestra.UI
         // Kallas av HudEditModeController:s "Standard"-knapp — nollställer alla tre
         // skal-slidrar till 1.0, vilket via OnHudScale/OnHotbarScale/OnEnemyHudScale
         // både applicerar skalan direkt och skriver över det sparade PlayerPrefs-värdet.
+        // Hotbarens INDIVIDUELLA Ability/Quick Item-skala (Full Edit Mode) hanteras
+        // separat av HotbarUI.ResetLayoutToDefault().
         public void ResetScales()
         {
             if (hudScaleSlider) hudScaleSlider.value = 1f;

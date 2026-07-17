@@ -42,6 +42,11 @@ public class PlayerHudUI : MonoBehaviour
     public Color xpColor = new Color(0.4f, 0.7f, 1f);  // ljusblå
     public Color barBackground = new Color(0.08f, 0.08f, 0.08f, 0.9f);
 
+    [Header("Utseende – bar-teman (valfritt, override av färgerna ovan per stapel)")]
+    public BarTheme healthBarTheme;
+    public BarTheme rageBarTheme;
+    public BarTheme xpBarTheme;
+
     [Header("Utseende – text (lämna tomt för TextMeshPros standardfont)")]
     public TMP_FontAsset nameFont;
     public TMP_FontAsset levelFont;
@@ -436,9 +441,9 @@ public class PlayerHudUI : MonoBehaviour
         fitter.horizontalFit = ContentSizeFitter.FitMode.PreferredSize;
         fitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
 
-        healthFill = BuildBar(rt.transform, "HealthBar", healthColor, barWidth, healthBarHeight, healthValueFont, out healthValueText, out healthBarRT, out healthBarLE);
-        rageFill = BuildBar(rt.transform, "RageBar", rageColor, rageBarWidth, rageBarHeight, rageValueFont, out rageValueText, out rageBarRT, out rageBarLE);
-        xpFill = BuildBar(rt.transform, "XPBar", xpColor, xpBarWidth, xpBarHeight, xpValueFont, out xpValueText, out xpBarRT, out xpBarLE);
+        healthFill = BuildBar(rt.transform, "HealthBar", healthColor, barWidth, healthBarHeight, healthValueFont, healthBarTheme, out healthValueText, out healthBarRT, out healthBarLE);
+        rageFill = BuildBar(rt.transform, "RageBar", rageColor, rageBarWidth, rageBarHeight, rageValueFont, rageBarTheme, out rageValueText, out rageBarRT, out rageBarLE);
+        xpFill = BuildBar(rt.transform, "XPBar", xpColor, xpBarWidth, xpBarHeight, xpValueFont, xpBarTheme, out xpValueText, out xpBarRT, out xpBarLE);
 
         BuildLevelUpPopup(xpBarRT);
     }
@@ -590,7 +595,7 @@ public class PlayerHudUI : MonoBehaviour
         Destroy(popupGO);
     }
 
-    Image BuildBar(Transform parent, string goName, Color fillColor, int width, int height, TMP_FontAsset customFont, out TMP_Text valueText, out RectTransform barRT, out LayoutElement barLE)
+    Image BuildBar(Transform parent, string goName, Color fillColor, int width, int height, TMP_FontAsset customFont, BarTheme theme, out TMP_Text valueText, out RectTransform barRT, out LayoutElement barLE)
     {
         GameObject barGO = new GameObject(goName, typeof(RectTransform), typeof(Image), typeof(LayoutElement));
         RectTransform rt = barGO.GetComponent<RectTransform>();
@@ -642,6 +647,12 @@ public class PlayerHudUI : MonoBehaviour
             valueText.raycastTarget = false;
             valueText.enableAutoSizing = false;
         }
+
+        ThemedBar themedBar = barGO.AddComponent<ThemedBar>();
+        themedBar.backgroundImage = background;
+        themedBar.fillImage = fillImage;
+        themedBar.theme = theme;
+        themedBar.Apply();
 
         return fillImage;
     }

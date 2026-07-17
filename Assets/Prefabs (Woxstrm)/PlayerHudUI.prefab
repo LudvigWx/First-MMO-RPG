@@ -46,6 +46,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PlayerHudUI
   health: {fileID: 0}
   rage: {fileID: 0}
+  experience: {fileID: 0}
   playerName: Woxstrm
   playerLevel: 80
   hudPosition: {x: 24, y: 24}
@@ -55,16 +56,32 @@ MonoBehaviour:
   healthBarHeight: 35
   rageBarWidth: 220
   rageBarHeight: 31
+  xpBarWidth: 150
+  xpBarHeight: 7
   barSpacing: 4
   healthColor: {r: 1, g: 0, b: 0, a: 1}
   rageColor: {r: 1, g: 0.55, b: 0, a: 1}
+  xpColor: {r: 0.4, g: 0.7, b: 1, a: 1}
   barBackground: {r: 0.08, g: 0.08, b: 0.08, a: 0.9}
+  healthBarTheme: {fileID: 11400000, guid: b3e08af2904a1514f9ec7ed173c15e17, type: 2}
+  rageBarTheme: {fileID: 11400000, guid: 56ae75c959e1ec6479ba7e3563085903, type: 2}
+  xpBarTheme: {fileID: 11400000, guid: 71853853e71f7bf4d9ecd9daf96b0e08, type: 2}
   nameFont: {fileID: 11400000, guid: 71b8d0b26f8adcd4080902cc584ad9f1, type: 2}
   levelFont: {fileID: 11400000, guid: 71b8d0b26f8adcd4080902cc584ad9f1, type: 2}
   healthValueFont: {fileID: 11400000, guid: 01462b999a656a146b0842b8f088a7fa, type: 2}
   rageValueFont: {fileID: 11400000, guid: 01462b999a656a146b0842b8f088a7fa, type: 2}
+  xpValueFont: {fileID: 0}
   nameFontSize: 25
   levelFontSize: 22
   barValueFontSize: 25
   showBarValues: 1
   toggleKey: 22
+  xpBarFillSpeed: 0.2
+  levelUpPopupColor: {r: 1, g: 0.85, b: 0.2, a: 1}
+  levelUpPopupDuration: 1.1
+  xpGainPopupColor: {r: 0.4, g: 0.9, b: 1, a: 1}
+  xpGainPopupFontSize: 30
+  xpGainPopupDuration: 1.3
+  xpGainPopupRiseDistance: 60
+  xpGainPopupWorldHeightOffset: 2.2
+  xpGainPopupFadeInFraction: 0.15
