@@ -11,12 +11,15 @@ using UnityEngine;
 // Använd: menyn "Quests" -> "Skapa testquest (Bevisa dig sjalv)".
 public static class QuestDataSetup
 {
-    private const string QuestFolder = "Assets/Data/Quests";
+    // Resources/Quests, INTE Assets/Data/Quests - QuestManager läser in alla QuestData-assets
+    // härifrån automatiskt via Resources.LoadAll (se QuestManager.LoadQuestsFromResources),
+    // så nya quests hittas av spelet utan att behöva dras in i en lista för hand.
+    private const string QuestFolder = "Assets/Resources/Quests";
 
     [MenuItem("Quests/Skapa testquest (Bevisa dig sjalv)")]
     public static void CreateTestQuest()
     {
-        EnsureFolder("Assets/Data");
+        EnsureFolder("Assets/Resources");
         EnsureFolder(QuestFolder);
 
         string path = QuestFolder + "/BevisaDigSjalv.asset";
@@ -28,8 +31,8 @@ public static class QuestDataSetup
 
         QuestData data = ScriptableObject.CreateInstance<QuestData>();
         data.questId = "bevisa_dig_sjalv";
-        data.title = "Bevisa dig själv";
-        data.description = "Döda 3 Roger för att visa att du är redo.";
+        data.title = "Prove Yourself";
+        data.description = "Kill 3 Roger to show you're ready.";
         data.questGiverId = "";
         data.objectives = new List<QuestObjective>
         {
@@ -38,7 +41,7 @@ public static class QuestDataSetup
                 type = ObjectiveType.Kill,
                 targetId = "Roger", // Matchar Enemy.enemyName på Enemy_Roger-prefaben, inte prefabens filnamn
                 requiredAmount = 3,
-                description = "Döda Roger (0/3)"
+                description = "Kill Roger (0/3)"
             }
         };
         data.rewardXp = 50;

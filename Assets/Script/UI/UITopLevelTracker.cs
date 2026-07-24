@@ -5,7 +5,7 @@ namespace Naxestra.UI
     // ovanpå - se PauseMenuController.Update() och JournalController.Update()/CloseJournal().
     public static class UITopLevelTracker
     {
-        public enum Layer { None, Pause, Journal }
+        public enum Layer { None, Pause, Journal, Dialogue }
 
         public static Layer TopLayer { get; private set; } = Layer.None;
 

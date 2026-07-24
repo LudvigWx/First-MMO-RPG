@@ -289,7 +289,7 @@ public static class EscapeMenuBuilder
     {
         GameObject panel = CreatePanelBase("GameplayPanel", parent, TextAnchor.MiddleCenter);
 
-        CreateLabel(panel.transform, "Gameplay (kommer snart)", 26);
+        CreateLabel(panel.transform, "Gameplay (coming soon)", 26);
         CreateMenuButton(panel.transform, "Back", controller.ShowMain);
 
         return panel;

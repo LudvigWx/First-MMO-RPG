@@ -15,7 +15,7 @@ public class MeleeBasicAttackAbility : Ability
     void Reset()
     {
         abilityName = "Basic Attack";
-        description = "Upprepad närstridsattack. Ingen cooldown, ingen kostnad. Genererar Rage.";
+        description = "Repeated melee attack. No cooldown, no cost. Generates Rage.";
         isFreeFiller = true;    // enda förmågan som FÅR sakna cooldown/kostnad
         cooldown = 0f;
         rageCost = 0;

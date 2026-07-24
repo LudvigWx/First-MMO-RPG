@@ -7,7 +7,7 @@ using UnityEngine;
 public abstract class Ability : ScriptableObject
 {
     [Header("Info")]
-    public string abilityName = "Ny förmåga";
+    public string abilityName = "New Ability";
     [TextArea] public string description;
     public Sprite icon;                 // placeholder tills vi har konst
 

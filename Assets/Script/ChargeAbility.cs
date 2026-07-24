@@ -17,7 +17,7 @@ public class ChargeAbility : Ability
     void Reset()
     {
         abilityName = "Charge";
-        description = "Rusa fram till målet och slå till. Gap-closer.";
+        description = "Rush to the target and strike. Gap-closer.";
         isFreeFiller = false;
         cooldown = 6f;
         rageCost = 20;

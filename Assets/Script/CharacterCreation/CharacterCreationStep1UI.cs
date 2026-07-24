@@ -118,29 +118,29 @@ public class CharacterCreationStep1UI : MonoBehaviour
         fitter.horizontalFit = ContentSizeFitter.FitMode.PreferredSize;
         fitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
 
-        CreateTitle("Skapa Karaktär - Steg 1", panelRT);
+        CreateTitle("Create Character - Step 1", panelRT);
 
-        CreateSectionLabel("Välj ras", panelRT);
+        CreateSectionLabel("Choose Race", panelRT);
         RectTransform raceRow = CreateButtonRow(panelRT, "RaceRow");
         for (int i = 0; i < races.Length; i++)
         {
             RaceData race = races[i];
-            Button b = CreateButton(race != null ? race.raceName : "(saknas)", raceRow, () => OnRaceSelected(race));
+            Button b = CreateButton(race != null ? race.raceName : "(missing)", raceRow, () => OnRaceSelected(race));
             raceButtons.Add(b);
         }
 
-        CreateSectionLabel("Välj klass", panelRT);
+        CreateSectionLabel("Choose Class", panelRT);
         classRow = CreateButtonRow(panelRT, "ClassRow");
 
-        CreateSectionLabel("Välj subklass", panelRT);
+        CreateSectionLabel("Choose Subclass", panelRT);
         subclassRow = CreateButtonRow(panelRT, "SubclassRow");
 
-        CreateSectionLabel("Kön", panelRT);
+        CreateSectionLabel("Gender", panelRT);
         RectTransform genderRow = CreateButtonRow(panelRT, "GenderRow");
-        maleButton = CreateButton("Man", genderRow, () => OnGenderSelected(true));
-        femaleButton = CreateButton("Kvinna", genderRow, () => OnGenderSelected(false));
+        maleButton = CreateButton("Male", genderRow, () => OnGenderSelected(true));
+        femaleButton = CreateButton("Female", genderRow, () => OnGenderSelected(false));
 
-        nextButton = CreateButton("Nästa", panelRT, OnNextClicked, buttonWidth, buttonHeight + 6);
+        nextButton = CreateButton("Next", panelRT, OnNextClicked, buttonWidth, buttonHeight + 6);
 
         RefreshRaceButtonColors();
         RefreshGenderButtonColors();
@@ -220,7 +220,7 @@ public class CharacterCreationStep1UI : MonoBehaviour
 
         if (selectedRace == null)
         {
-            CreateBodyText("Välj en ras först", classRow);
+            CreateBodyText("Choose a race first", classRow);
             return;
         }
 
@@ -242,7 +242,7 @@ public class CharacterCreationStep1UI : MonoBehaviour
 
         if (selectedClass == null)
         {
-            CreateBodyText("Välj en klass först", subclassRow);
+            CreateBodyText("Choose a class first", subclassRow);
             return;
         }
 

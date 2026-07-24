@@ -10,4 +10,8 @@ public class QuestProgress
     public int currentObjectiveIndex;
     public List<int> objectiveProgress = new List<int>();
     public bool isCompleted;
+
+    // Alla mål klara men INTE inlämnad än - måste lämnas in hos rätt NPC (QuestGiverNPC.TryTurnIn)
+    // innan CompleteQuest/belöning triggas. Skild från isCompleted, som bara sätts EFTER inlämning.
+    public bool objectivesComplete;
 }

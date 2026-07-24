@@ -46,6 +46,8 @@ namespace Naxestra.UI
         public bool IsOpen { get; private set; }
         public Tab CurrentTab { get; private set; } = Tab.Quests;
 
+        private Canvas hudCanvas;
+
         private void Start()
         {
             if (journalRoot) journalRoot.SetActive(false);
@@ -56,9 +58,10 @@ namespace Naxestra.UI
         {
             if (Keyboard.current == null) return;
 
-            // Pause-menyn ligger överst just nu - rör inte Journal-snabbtangenterna alls (undviker
-            // att båda menyerna hamnar öppna samtidigt).
+            // Pause-menyn eller en NPC-dialog ligger överst just nu - rör inte Journal-
+            // snabbtangenterna alls (undviker att flera menyer hamnar öppna samtidigt).
             if (UITopLevelTracker.TopLayer == UITopLevelTracker.Layer.Pause) return;
+            if (UITopLevelTracker.TopLayer == UITopLevelTracker.Layer.Dialogue) return;
 
             if (Keyboard.current.qKey.wasPressedThisFrame) HandleTabKey(Tab.Quests);
             else if (Keyboard.current.iKey.wasPressedThisFrame) HandleTabKey(Tab.Inventory);
@@ -87,6 +90,7 @@ namespace Naxestra.UI
             ShowTab(tab);
             SetGameplayInput(false);
             SetCursor(freeCursorWhenOpen);
+            SetHudVisible(false);
         }
 
         public void CloseJournal()
@@ -96,6 +100,20 @@ namespace Naxestra.UI
             if (journalRoot) journalRoot.SetActive(false);
             SetGameplayInput(true);
             SetCursor(false);
+            SetHudVisible(true);
+        }
+
+        // PlayerHudCanvas byggs i kod av PlayerHudUI/HotbarUI vid Start() och finns därför inte i
+        // scenen vid Editor-byggtid — måste hittas på namn i Play mode istället. Samma mönster som
+        // PauseMenuController.SetHudVisible.
+        private void SetHudVisible(bool visible)
+        {
+            if (hudCanvas == null)
+            {
+                GameObject go = GameObject.Find("PlayerHudCanvas");
+                if (go != null) hudCanvas = go.GetComponent<Canvas>();
+            }
+            if (hudCanvas != null) hudCanvas.enabled = visible;
         }
 
         public void ShowTab(Tab tab)

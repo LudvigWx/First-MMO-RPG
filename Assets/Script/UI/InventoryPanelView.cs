@@ -10,12 +10,13 @@ public class InventoryPanelView : MonoBehaviour
 {
     [Header("Grid")]
     public int slotCount = 30;
-    public int columns = 6;
     public int slotSize = 64;
     public int slotSpacing = 8;
     public SlotTheme slotTheme;
 
     private bool built;
+    private RectTransform contentRT;
+    private ScrollRect scrollRect;
 
     void Awake()
     {
@@ -46,24 +47,32 @@ public class InventoryPanelView : MonoBehaviour
         viewportGO.GetComponent<Mask>().showMaskGraphic = false;
 
         GameObject contentGO = new GameObject("Content", typeof(RectTransform), typeof(GridLayoutGroup), typeof(ContentSizeFitter));
-        RectTransform contentRT = contentGO.GetComponent<RectTransform>();
+        contentRT = contentGO.GetComponent<RectTransform>();
         contentRT.SetParent(viewportRT, false);
         contentRT.anchorMin = new Vector2(0f, 1f);
         contentRT.anchorMax = new Vector2(1f, 1f);
         contentRT.pivot = new Vector2(0.5f, 1f);
         contentRT.anchoredPosition = Vector2.zero;
+        // Unitys default sizeDelta för en ny RectTransform är (100,100) - för en horisontellt
+        // stretchad rect blir det 50 enheter överhäng på VARJE sida om vi inte nollställer X här.
+        contentRT.sizeDelta = new Vector2(0f, contentRT.sizeDelta.y);
 
         GridLayoutGroup grid = contentGO.GetComponent<GridLayoutGroup>();
         grid.cellSize = new Vector2(slotSize, slotSize);
         grid.spacing = new Vector2(slotSpacing, slotSpacing);
-        grid.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
-        grid.constraintCount = columns;
-        grid.padding = new RectOffset(8, 8, 8, 8);
+        // Flexible istället för FixedColumnCount: räknar ut hur många kolumner som får plats i
+        // containerns bredd (olika i solo- vs split-läge, se InventoryPanelView.MoveToSlot) och
+        // radbryter resten nedåt, så griden aldrig sticker ut utanför sidan horisontellt.
+        grid.constraint = GridLayoutGroup.Constraint.Flexible;
+        // Stor topp- och sidmarginal - pergamentbildens kanter är mörkare/skuggade innan den ljusa
+        // sidytan börjar (samma orsak/fix som QuestsPanelView), så griden flyttas in förbi dem.
+        grid.padding = new RectOffset(70, 70, 110, 30);
+        grid.childAlignment = TextAnchor.UpperCenter;
 
         ContentSizeFitter contentFitter = contentGO.GetComponent<ContentSizeFitter>();
         contentFitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
 
-        ScrollRect scrollRect = scrollGO.GetComponent<ScrollRect>();
+        scrollRect = scrollGO.GetComponent<ScrollRect>();
         scrollRect.content = contentRT;
         scrollRect.viewport = viewportRT;
         scrollRect.horizontal = false;
@@ -74,6 +83,19 @@ public class InventoryPanelView : MonoBehaviour
         {
             BuildSlot(contentRT, i);
         }
+
+        RefreshLayout();
+    }
+
+    // Tvingar fram en layout-omräkning + återställer scrollposition till toppen. Utan detta kan
+    // ScrollRect råka klämma fast Content på en Y-position som hörde till en tidigare (tom eller
+    // annorlunda bred) storlek, så griden verkar sväva utanför synligt fönster - se
+    // QuestsPanelView.Refresh för samma mönster.
+    void RefreshLayout()
+    {
+        Canvas.ForceUpdateCanvases();
+        LayoutRebuilder.ForceRebuildLayoutImmediate(contentRT);
+        if (scrollRect != null) scrollRect.verticalNormalizedPosition = 1f;
     }
 
     void BuildSlot(Transform parent, int index)
@@ -82,7 +104,7 @@ public class InventoryPanelView : MonoBehaviour
         slotGO.transform.SetParent(parent, false);
 
         Image background = slotGO.GetComponent<Image>();
-        background.color = new Color(0.08f, 0.08f, 0.08f, 0.9f);
+        background.color = new Color(0.35f, 0.24f, 0.14f, 0.3f);
 
         ThemedSlot themedSlot = slotGO.AddComponent<ThemedSlot>();
         themedSlot.slotBackground = background;
@@ -105,6 +127,8 @@ public class InventoryPanelView : MonoBehaviour
         rt.offsetMin = Vector2.zero;
         rt.offsetMax = Vector2.zero;
         rt.localScale = Vector3.one;
+
+        RefreshLayout();
     }
 
     static void StretchFull(RectTransform rt)

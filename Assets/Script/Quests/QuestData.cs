@@ -18,7 +18,11 @@ public class QuestObjective
 
 // Datamall för EN quest - delad "mall" som återanvänds av alla spelare som har questen.
 // Spelar-specifik data (vilket mål man kommit till, om den är klar) ligger i QuestProgress
-// istället, se den filen. Skapa nya quests via Project-fönstret -> Create -> Quests -> Quest Data.
+// istället, se den filen.
+//
+// Skapa nya quests via menyn Quests -> Ny Quest... (QuestCreatorWindow, ett enkelt formulär) -
+// eller manuellt via Project-fönstret -> Create -> Quests -> Quest Data. Assets som hamnar i
+// Assets/Resources/Quests hittas automatiskt av QuestManager, ingen manuell koppling behövs.
 [CreateAssetMenu(fileName = "NewQuestData", menuName = "Quests/Quest Data")]
 public class QuestData : ScriptableObject
 {
@@ -43,6 +47,12 @@ public class QuestData : ScriptableObject
 
     [Header("Krav (framtida questkedjor)")]
     public List<string> prerequisiteQuestIds = new List<string>();
+
+    [Header("Utseende i Journal (frivilligt)")]
+    [Tooltip("Valfri ikon bredvid titeln i quest-listan. Lämna tom för ingen ikon.")]
+    public Sprite icon;
+    [Tooltip("Alpha 0 (osynlig) som standard - höj alpha för att ge questen en färgad kant i listan.")]
+    public Color accentColor = new Color(1f, 1f, 1f, 0f);
 
     [Header("Karma-gate (EJ implementerad - fälten ligger bara på plats för framtiden)")]
     [Tooltip("Lämna null/oanvänd om questen inte ska karma-gatas.")]

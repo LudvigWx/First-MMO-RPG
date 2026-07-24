@@ -33,9 +33,9 @@ public class HotbarUI : MonoBehaviour
     // Layout-presets (kolumn-antal) för Edit Mode-panelen (HudEditModeController).
     // Index i *ColumnOptions/*ColumnLabels måste matcha varandra (parallella arrayer).
     public static readonly int[] AbilityColumnOptions = { 8, 4, 2, 1 };
-    public static readonly string[] AbilityColumnLabels = { "1 rad (1x8)", "2 rader (2x4)", "4 rader (4x2)", "8 rader (8x1)" };
+    public static readonly string[] AbilityColumnLabels = { "1 row (1x8)", "2 rows (2x4)", "4 rows (4x2)", "8 rows (8x1)" };
     public static readonly int[] QuickColumnOptions = { 2, 4, 1 };
-    public static readonly string[] QuickColumnLabels = { "2x2", "1 rad (1x4)", "4 rader (4x1)" };
+    public static readonly string[] QuickColumnLabels = { "2x2", "1 row (1x4)", "4 rows (4x1)" };
 
     const string K_ABILITY_COLUMNS = "hud_hotbar_ability_columns";
     const string K_QUICK_COLUMNS = "hud_hotbar_quick_columns";

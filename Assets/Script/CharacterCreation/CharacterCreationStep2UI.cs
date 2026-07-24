@@ -45,7 +45,7 @@ public class CharacterCreationStep2UI : MonoBehaviour
 
     // Kategorinamn = exakt namn i prefabens hierarki under "FACE DETAILS PARTS".
     private static readonly string[] CategoryKeys = { "HAIRS", "EYEBROWS", "EYES", "FACE HAIRS", "EARS", "NOSES" };
-    private static readonly string[] CategoryLabels = { "Hår", "Ögonbryn", "Ögon", "Ansiktshår", "Öron", "Näsa" };
+    private static readonly string[] CategoryLabels = { "Hair", "Eyebrows", "Eyes", "Face Hair", "Ears", "Nose" };
 
     private GameObject panelRoot;
     private GameObject previewRig; // förälder till spawnad karaktär + kamera, döljs ihop med panelen
@@ -89,7 +89,7 @@ public class CharacterCreationStep2UI : MonoBehaviour
         string race = CharacterCreationSelection.chosenRace != null ? CharacterCreationSelection.chosenRace.raceName : "-";
         string cls = CharacterCreationSelection.chosenClass != null ? CharacterCreationSelection.chosenClass.className : "-";
         string sub = CharacterCreationSelection.chosenSubclassName ?? "-";
-        string gender = CharacterCreationSelection.isMale ? "Man" : "Kvinna";
+        string gender = CharacterCreationSelection.isMale ? "Male" : "Female";
         return race + " - " + cls + " (" + sub + ") - " + gender;
     }
 
@@ -267,7 +267,7 @@ public class CharacterCreationStep2UI : MonoBehaviour
         fitter.horizontalFit = ContentSizeFitter.FitMode.PreferredSize;
         fitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
 
-        CreateTitle("Edit Appearance - Steg 2", panelRT);
+        CreateTitle("Edit Appearance - Step 2", panelRT);
         summaryText = CreateBodyText("", panelRT);
 
         BuildPreviewImage(panelRT);
@@ -283,10 +283,10 @@ public class CharacterCreationStep2UI : MonoBehaviour
             CreateButton(">", row, () => OnCycleClicked(key, 1), arrowButtonWidth, buttonHeight);
         }
 
-        CreateSectionLabel("Hudfärg (sparas, tonas inte visuellt än)", panelRT);
+        CreateSectionLabel("Skin Color (saved, not visually applied yet)", panelRT);
         skinRow = CreateRow(panelRT, "SkinRow");
 
-        CreateButton("Tillbaka", panelRT, OnBackClicked, buttonWidth, buttonHeight);
+        CreateButton("Back", panelRT, OnBackClicked, buttonWidth, buttonHeight);
     }
 
     void BuildPreviewCamera()

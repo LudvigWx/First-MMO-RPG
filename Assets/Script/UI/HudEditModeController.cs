@@ -27,6 +27,7 @@ namespace Naxestra.UI
         [SerializeField] private Transform hudRoot;
         [SerializeField] private Transform hotbarRoot;
         [SerializeField] private Transform enemyHudRoot;
+        [SerializeField] private Transform questTrackerRoot;
         [SerializeField] private PlayerHudUI playerHudUI;
         [SerializeField] private HotbarUI hotbarUI;
 
@@ -226,6 +227,12 @@ namespace Naxestra.UI
                 enemyHudRoot = targetFrame.panel.transform;
             }
 
+            if (questTrackerRoot == null)
+            {
+                GameObject go = GameObject.Find("QuestTrackerRoot");
+                if (go != null) questTrackerRoot = go.transform;
+            }
+
             if (playerHudUI == null) playerHudUI = FindFirstObjectByType<PlayerHudUI>();
             if (hotbarUI == null) hotbarUI = FindFirstObjectByType<HotbarUI>();
         }
@@ -236,6 +243,7 @@ namespace Naxestra.UI
             TryAddHandle(hudRoot, "hud_playerhud");
             TryAddHandle(hotbarRoot, "hud_hotbar");
             TryAddHandle(enemyHudRoot, "hud_enemyhud");
+            TryAddHandle(questTrackerRoot, "hud_questtracker");
         }
 
         private void TryAddHandle(Transform target, string saveKey)

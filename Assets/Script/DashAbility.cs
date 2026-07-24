@@ -30,8 +30,9 @@ public class DashAbility : MonoBehaviour
 
     void Update()
     {
-        // Tangent Q = dash (lätt att byta: t.ex. spaceKey, leftShiftKey)
-        if (Keyboard.current != null && Keyboard.current.qKey.wasPressedThisFrame)
+        // Tangent Vänster Alt = dash (bytt från Q 2026-07-24, Q krockade med Journal-genvägen
+        // för Quest-fliken - se JournalController.cs)
+        if (Keyboard.current != null && Keyboard.current.leftAltKey.wasPressedThisFrame)
         {
             TryDash();
         }

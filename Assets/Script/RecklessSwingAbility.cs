@@ -12,7 +12,7 @@ public class RecklessSwingAbility : Ability
     void Reset()
     {
         abilityName = "Reckless Swing";
-        description = "Kraftfullt hugg. Hög skada, dyr i Rage, kort cooldown. Ravager-specifik.";
+        description = "Powerful strike. High damage, costly in Rage, short cooldown. Ravager-specific.";
         isFreeFiller = false;
         cooldown = 3f;       // kort cooldown
         rageCost = 35;       // mer än snittet (Charge 20)

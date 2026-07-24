@@ -14,7 +14,7 @@ public class ShieldWallAbility : Ability
     void Reset()
     {
         abilityName = "Shield Wall";
-        description = "Minskar inkommande skada i några sekunder. Bulwark-specifik.";
+        description = "Reduces incoming damage for a few seconds. Bulwark-specific.";
         isFreeFiller = false;
         cooldown = 20f;      // lång cooldown
         rageCost = 30;
